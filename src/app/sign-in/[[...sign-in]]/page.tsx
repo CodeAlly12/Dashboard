@@ -1,5 +1,9 @@
 import { SignIn } from "@clerk/nextjs";
 
+export function generateStaticParams() {
+  return [{}];
+}
+
 export default function SignInPage() {
   return (
     <div className="navy-gradient flex min-h-screen items-center justify-center p-6">

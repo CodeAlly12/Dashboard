@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>North Star Hospitality OS</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+</head>
+<body>
+
+<!-- Sidebar Overlay (mobile) -->
+<div id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+<!-- ── Sidebar ── -->
+<aside id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">NS</div>
+    <h1>North Star</h1>
+    <p>Hospitality OS</p>
+  </div>
+  <nav class="sidebar-nav" id="sidebar-nav"></nav>
+  <div class="sidebar-footer">
+    HH Villa &amp; Giant House<br>
+    <span style="color:var(--gold)">●</span> Live · 2 properties
+  </div>
+</aside>
+
+<!-- ── Main ── -->
+<div id="main">
+
+  <!-- Header -->
+  <header id="header">
+    <div class="header-left">
+      <button class="btn-icon" id="menu-btn" onclick="toggleSidebar()">
+        <i data-lucide="menu"></i>
+      </button>
+      <span id="page-title" style="font-size:16px;font-weight:600">Dashboard</span>
+    </div>
+    <div class="property-switcher">
+      <button class="prop-btn active" onclick="switchProp(this,'HH Villa')">HH Villa</button>
+      <button class="prop-btn" onclick="switchProp(this,'Giant House')">Giant House</button>
+      <button class="prop-btn" onclick="switchProp(this,'All')">All</button>
+    </div>
+    <div class="header-right">
+      <button class="btn-icon" title="Notifications"><i data-lucide="bell"></i></button>
+      <button class="btn-icon" title="Search"><i data-lucide="search"></i></button>
+      <div class="avatar" title="Ally Esther">AE</div>
+    </div>
+  </header>
+
+  <!-- Content -->
+  <main id="content">
+
+    <!-- ── DASHBOARD ── -->
+    <section id="dashboard" class="section active">
+      <div class="page-header">
+        <div>
+          <h2>Dashboard</h2>
+          <p>Welcome back, Ally. Here's what's happening across your properties.</p>
+        </div>
+        <button class="btn btn-gold"><i data-lucide="plus"></i> New Reservation</button>
+      </div>
+
+      <!-- KPIs -->
+      <div class="grid-4" style="margin-bottom:20px">
+        <div class="card">
+          <div class="card-title">Total Revenue (YTD)</div>
+          <div class="card-value kpi-value" id="kpi-revenue">$0</div>
+          <div class="card-delta up">↑ 18% vs last year</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Avg Occupancy</div>
+          <div class="card-value kpi-value" id="kpi-occupancy">0%</div>
+          <div class="card-delta up">↑ 6% vs last month</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Active Reservations</div>
+          <div class="card-value kpi-value" id="kpi-reservations">0</div>
+          <div class="card-sub">Across both properties</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Avg Daily Rate</div>
+          <div class="card-value kpi-value" id="kpi-adr">$0</div>
+          <div class="card-delta up">↑ 12% vs last year</div>
+        </div>
+      </div>
+
+      <!-- Charts -->
+      <div class="grid-2" style="margin-bottom:20px">
+        <div class="card chart-card">
+          <div class="chart-header">
+            <div><div class="chart-title">Revenue Trend</div><div class="chart-sub">Monthly ($K) · Both Properties</div></div>
+          </div>
+          <div class="chart-wrap"><canvas id="revenueChart"></canvas></div>
+        </div>
+        <div class="card chart-card">
+          <div class="chart-header">
+            <div><div class="chart-title">Occupancy Rate</div><div class="chart-sub">% · Last 6 months</div></div>
+          </div>
+          <div class="chart-wrap"><canvas id="occupancyChart"></canvas></div>
+        </div>
+      </div>
+
+      <!-- Recent Reservations -->
+      <div class="card">
+        <div class="chart-header" style="margin-bottom:12px">
+          <div class="chart-title">Recent Reservations</div>
+          <button class="btn btn-outline" onclick="navigate('reservations')">View All</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th>Guest</th><th>Property</th><th>Dates</th><th>Total</th><th>Status</th><th>Channel</th>
+            </tr></thead>
+            <tbody id="recent-reservations"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── RESERVATIONS ── -->
+    <section id="reservations" class="section">
+      <div class="page-header">
+        <div><h2>Reservations</h2><p>Manage and track all bookings across both properties.</p></div>
+        <button class="btn btn-gold"><i data-lucide="plus"></i> New Reservation</button>
+      </div>
+      <div class="filter-tabs">
+        <button class="filter-tab active">All</button>
+        <button class="filter-tab">Confirmed</button>
+        <button class="filter-tab">Pending</button>
+        <button class="filter-tab">Checked In</button>
+        <button class="filter-tab">Checked Out</button>
+      </div>
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th>Guest</th><th>Property</th><th>Check-in</th><th>Check-out</th><th>Nights</th><th>Total</th><th>Status</th><th>Channel</th>
+            </tr></thead>
+            <tbody id="reservations-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── CHANNEL MANAGER ── -->
+    <section id="channel-manager" class="section">
+      <div class="page-header">
+        <div><h2>Channel Manager</h2><p>Synchronize listings, rates, and availability across all platforms.</p></div>
+        <button class="btn btn-gold"><i data-lucide="refresh-cw"></i> Sync All</button>
+      </div>
+      <div class="grid-3" id="channel-grid"></div>
+    </section>
+
+    <!-- ── REVENUE ── -->
+    <section id="revenue" class="section">
+      <div class="page-header">
+        <div><h2>Revenue</h2><p>Detailed financial performance across properties and channels.</p></div>
+        <button class="btn btn-outline"><i data-lucide="download"></i> Export</button>
+      </div>
+
+      <!-- Stats -->
+      <div class="grid-4" style="margin-bottom:20px">
+        <div class="card"><div class="card-title">Total Revenue</div><div class="card-value">$847K</div><div class="card-delta up">↑ 18% YoY</div></div>
+        <div class="card"><div class="card-title">HH Villa</div><div class="card-value">$451K</div><div class="card-delta up">↑ 22% YoY</div></div>
+        <div class="card"><div class="card-title">Giant House</div><div class="card-value">$396K</div><div class="card-delta up">↑ 14% YoY</div></div>
+        <div class="card"><div class="card-title">RevPAR</div><div class="card-value">$331</div><div class="card-delta up">↑ 9% YoY</div></div>
+      </div>
+
+      <div class="grid-2" style="margin-bottom:20px">
+        <div class="card chart-card">
+          <div class="chart-header"><div><div class="chart-title">Revenue by Channel</div><div class="chart-sub">YTD · $K</div></div></div>
+          <div class="chart-wrap"><canvas id="revenueByChannel"></canvas></div>
+        </div>
+        <div class="card chart-card">
+          <div class="chart-header"><div><div class="chart-title">Monthly Trend</div><div class="chart-sub">Last 6 months · $K</div></div></div>
+          <div class="chart-wrap"><canvas id="revenueTrend"></canvas></div>
+        </div>
+      </div>
+
+      <!-- Channel breakdown -->
+      <div class="card">
+        <div class="chart-title" style="margin-bottom:16px">Channel Revenue Breakdown</div>
+        ${[['Airbnb','$312K','37%',37],['Booking.com','$198K','24%',24],['Direct','$126K','15%',15],['Vrbo','$124K','14%',14],['Expedia','$87K','10%',10]].map(([ch,rev,pct,bar]) => `
+          <div class="stat-row">
+            <div style="width:100px;font-size:13px">${ch}</div>
+            <div class="stat-bar-wrap"><div class="stat-bar" style="width:${bar}%"></div></div>
+            <div style="width:50px;text-align:right;font-size:13px;color:var(--gold);font-weight:600">${pct}</div>
+            <div style="width:60px;text-align:right;font-size:13px;color:var(--muted)">${rev}</div>
+          </div>
+        `).join('')}
+      </div>
+    </section>
+
+    <!-- ── HOUSEKEEPING ── -->
+    <section id="housekeeping" class="section">
+      <div class="page-header">
+        <div><h2>Housekeeping</h2><p>Track cleaning, inspection and restocking tasks.</p></div>
+        <button class="btn btn-gold"><i data-lucide="plus"></i> Add Task</button>
+      </div>
+      <div class="filter-tabs">
+        <button class="filter-tab active">All Tasks</button>
+        <button class="filter-tab">Pending</button>
+        <button class="filter-tab">In Progress</button>
+        <button class="filter-tab">Completed</button>
+      </div>
+      <div class="grid-3" id="hk-grid"></div>
+    </section>
+
+    <!-- ── MAINTENANCE ── -->
+    <section id="maintenance" class="section">
+      <div class="page-header">
+        <div><h2>Maintenance</h2><p>Track and resolve property maintenance issues.</p></div>
+        <button class="btn btn-gold"><i data-lucide="plus"></i> Report Issue</button>
+      </div>
+      <div class="filter-tabs">
+        <button class="filter-tab active">All</button>
+        <button class="filter-tab">High Priority</button>
+        <button class="filter-tab">Open</button>
+        <button class="filter-tab">In Progress</button>
+        <button class="filter-tab">Completed</button>
+      </div>
+      <div id="maintenance-list"></div>
+    </section>
+
+    <!-- ── GUESTS ── -->
+    <section id="guests" class="section">
+      <div class="page-header">
+        <div><h2>Guests</h2><p>Guest profiles, history, and relationship management.</p></div>
+        <button class="btn btn-gold"><i data-lucide="user-plus"></i> Add Guest</button>
+      </div>
+      <div class="search-wrap">
+        <i data-lucide="search"></i>
+        <input type="text" placeholder="Search guests by name, email…" />
+      </div>
+      <div class="grid-3" id="guests-grid"></div>
+    </section>
+
+    <!-- ── CALENDAR ── -->
+    <section id="calendar" class="section">
+      <div class="page-header">
+        <div><h2>Calendar</h2><p>Visual overview of all reservations — June 2026.</p></div>
+        <div style="display:flex;gap:12px;align-items:center">
+          <div style="display:flex;gap:8px;font-size:12px">
+            <span><span style="color:#818CF8">■</span> HH Villa</span>
+            <span><span style="color:var(--gold)">■</span> Giant House</span>
+          </div>
+          <button class="btn btn-outline"><i data-lucide="chevron-left"></i></button>
+          <span style="font-size:14px;font-weight:600">June 2026</span>
+          <button class="btn btn-outline"><i data-lucide="chevron-right"></i></button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="cal-grid" id="cal-grid"></div>
+      </div>
+    </section>
+
+    <!-- ── MESSAGES ── -->
+    <section id="messages" class="section">
+      <div class="page-header">
+        <div><h2>Messages</h2><p>Guest communications across all channels.</p></div>
+        <button class="btn btn-gold"><i data-lucide="edit"></i> New Message</button>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden">
+        <div class="messages-layout">
+          <div class="conv-list" id="conv-list"></div>
+          <div class="chat-area">
+            <div class="chat-header">
+              <div class="conv-avatar">SJ</div>
+              <div>
+                <div style="font-weight:600;font-size:14px">Sarah Johnson</div>
+                <div style="font-size:11px;color:var(--muted)">HH Villa · Airbnb · Jun 15–20</div>
+              </div>
+            </div>
+            <div class="chat-messages" id="chat-messages"></div>
+            <div class="chat-input">
+              <input type="text" placeholder="Type a message…" />
+              <button class="btn btn-gold"><i data-lucide="send"></i></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── MARKETING ── -->
+    <section id="marketing" class="section">
+      <div class="page-header">
+        <div><h2>Marketing</h2><p>Campaign performance and website traffic analytics.</p></div>
+        <button class="btn btn-gold"><i data-lucide="plus"></i> New Campaign</button>
+      </div>
+
+      <!-- Campaign Cards -->
+      <div class="grid-3" style="margin-bottom:20px">
+        ${[
+          ['Summer Promotion', 'Active', '2,840 impressions', '$4,200 revenue'],
+          ['Direct Booking Drive', 'Active', '1,560 clicks', '$2,800 revenue'],
+          ['Early Bird Discount', 'Completed', '980 bookings', '$6,100 revenue'],
+        ].map(([name, status, stat1, stat2]) => `
+          <div class="card">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+              <div style="font-size:14px;font-weight:600">${name}</div>
+              ${status === 'Active' ? '<span class="badge badge-confirmed">Active</span>' : '<span class="badge badge-checked-out">Completed</span>'}
+            </div>
+            <div style="font-size:13px;color:var(--muted);margin-bottom:4px">${stat1}</div>
+            <div style="font-size:14px;font-weight:600;color:var(--gold)">${stat2}</div>
+          </div>
+        `).join('')}
+      </div>
+
+      <div class="grid-2">
+        <div class="card chart-card">
+          <div class="chart-header"><div><div class="chart-title">Website Traffic</div><div class="chart-sub">Monthly visitors</div></div></div>
+          <div class="chart-wrap"><canvas id="trafficChart"></canvas></div>
+        </div>
+        <div class="card chart-card">
+          <div class="chart-header"><div><div class="chart-title">Booking Attribution</div><div class="chart-sub">By channel (%)</div></div></div>
+          <div class="chart-wrap"><canvas id="attributionChart"></canvas></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── SETTINGS ── -->
+    <section id="settings" class="section">
+      <div class="page-header">
+        <div><h2>Settings</h2><p>Property configuration and account preferences.</p></div>
+        <button class="btn btn-gold"><i data-lucide="save"></i> Save Changes</button>
+      </div>
+
+      <div class="grid-2">
+        <div>
+          <!-- Property Info -->
+          <div class="card settings-group">
+            <h3>Property — HH Villa</h3>
+            <div class="field-row"><label>Property Name</label><input type="text" value="HH Villa" /></div>
+            <div class="field-row"><label>Website</label><input type="text" value="www.hhvilla.com" /></div>
+            <div class="field-row"><label>Location</label><input type="text" value="Phuket, Thailand" /></div>
+            <div class="field-row"><label>Bedrooms</label><input type="number" value="5" /></div>
+          </div>
+
+          <!-- Notifications -->
+          <div class="card settings-group">
+            <h3>Notifications</h3>
+            ${[
+              ['New Reservation', 'Get notified when a booking is confirmed', true],
+              ['Guest Check-in', 'Alert when a guest checks in', true],
+              ['Maintenance Alert', 'Notify on new maintenance issues', true],
+              ['Payment Received', 'Confirm when payment clears', false],
+            ].map(([label, desc, on]) => `
+              <div class="toggle-row">
+                <div><div class="toggle-label">${label}</div><div class="toggle-desc">${desc}</div></div>
+                <label class="toggle"><input type="checkbox" ${on ? 'checked' : ''}><span class="toggle-slider"></span></label>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+
+        <div>
+          <!-- Integrations -->
+          <div class="card settings-group">
+            <h3>Integrations</h3>
+            ${[
+              ['Airbnb', '#FF5A5F', 'Connected', true],
+              ['Booking.com', '#003580', 'Connected', true],
+              ['Expedia', '#FFC72C', 'Connected', true],
+              ['Vrbo', '#1A5276', 'Connected', true],
+              ['Stripe', '#635BFF', 'Not connected', false],
+              ['WhatsApp Business', '#25D366', 'Not connected', false],
+            ].map(([name, color, status, on]) => `
+              <div class="card integration-card" style="margin-bottom:8px;padding:12px 14px">
+                <div class="integration-left">
+                  <div class="integration-icon" style="background:${color}">${name.slice(0,2).toUpperCase()}</div>
+                  <div>
+                    <div style="font-size:13px;font-weight:600">${name}</div>
+                    <div style="font-size:11px;color:${on ? '#10B981' : 'var(--muted)'}">${status}</div>
+                  </div>
+                </div>
+                <label class="toggle"><input type="checkbox" ${on ? 'checked' : ''}><span class="toggle-slider"></span></label>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script src="app.js"></script>
+<script>
+  // Filter tabs click
+  document.querySelectorAll('.filter-tabs').forEach(group => {
+    group.querySelectorAll('.filter-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        group.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+      });
+    });
+  });
+
+  // Property switcher
+  function switchProp(btn, prop) {
+    document.querySelectorAll('.prop-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+</script>
+</body>
+</html>
