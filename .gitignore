@@ -40,4 +40,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-.claude/
+
+# claude code — ignore local state, but track shared agent definitions
+.claude/*
+!.claude/agents/
